@@ -117,5 +117,5 @@ employees=# alter system set shared_preload_libraries = 'pg_stat_statements.dll'
 ALTER SYSTEM
 employees=#
 
-
+CREATE EXTENTION pg_stat_statements;
 
