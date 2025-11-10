@@ -119,3 +119,8 @@ employees=#
 
 CREATE EXTENTION pg_stat_statements;
 
+Reading Function and Procedure body:
+SELECT proname, pg_get_functiondef(oid)
+FROM pg_proc
+WHERE proname = 'your_proc_name'
+  AND prokind = 'p';  -- only procedures
