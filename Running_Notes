@@ -67,6 +67,50 @@ INSERT INTO salgrade VALUES (4, 2001, 3000);
 INSERT INTO salgrade VALUES (5, 3001, 9999);
 
 
+Day 1:
+-----
+
+Fsync test:
+
+[postgres@pgserver ~]$ pg_test_fsync
+5 seconds per test
+O_DIRECT supported on this platform for open_datasync and open_sync.
+
+Compare file sync methods using one 8kB write:
+(in "wal_sync_method" preference order, except fdatasync is Linux's default)
+        open_datasync                       583.021 ops/sec    1715 usecs/op
+        fdatasync                           648.754 ops/sec    1541 usecs/op
+        fsync                               268.702 ops/sec    3722 usecs/op
+        fsync_writethrough                              n/a
+        open_sync                           266.889 ops/sec    3747 usecs/op
+
+Compare file sync methods using two 8kB writes:
+(in "wal_sync_method" preference order, except fdatasync is Linux's default)
+        open_datasync                       339.382 ops/sec    2947 usecs/op
+        fdatasync                           663.833 ops/sec    1506 usecs/op
+        fsync                               244.005 ops/sec    4098 usecs/op
+        fsync_writethrough                              n/a
+        open_sync                           117.520 ops/sec    8509 usecs/op
+
+Compare open_sync with different write sizes:
+(This is designed to compare the cost of writing 16kB in different write
+open_sync sizes.)
+         1 * 16kB open_sync write           276.144 ops/sec    3621 usecs/op
+         2 *  8kB open_sync writes          133.474 ops/sec    7492 usecs/op
+         4 *  4kB open_sync writes           67.094 ops/sec   14904 usecs/op
+         8 *  2kB open_sync writes           34.026 ops/sec   29389 usecs/op
+        16 *  1kB open_sync writes           16.628 ops/sec   60140 usecs/op
+
+Test if fsync on non-write file descriptor is honored:
+(If the times are similar, fsync() can sync data written on a different
+descriptor.)
+        write, fsync, close                 254.867 ops/sec    3924 usecs/op
+        write, close, fsync                 275.780 ops/sec    3626 usecs/op
+
+Non-sync'ed 8kB writes:
+        write                           2067514.051 ops/sec       0 usecs/op
+[postgres@pgserver ~]$
+
 
 
 
