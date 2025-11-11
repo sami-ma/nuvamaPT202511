@@ -1,0 +1,15 @@
+1) Identify ideal wal_sync_method for you lab machine.
+2) Examine all the settings for bgwriter and set the bgwriter_delay to 50ms
+3) Verify if the vacuum runs while a transaction has acquired exclusive row level lock on a table.  (hint: start a transaction and update a row from any table. From other connection vacuum same table)
+4) run below code and check what kind of locks are acquired on that table.
+
+    start transaction;
+     update emp set sal = sal + 1000 where empno = 7358;
+5) Check what is ratio of checkpoints timeout  to requested checkpoints
+6) Load libraries required to load pg_stat_statement extension and create this extension in postgres database.
+7) Create pg_buffrecache extention.
+	a) Totally how many buffers are there in shared_buffer.
+	b) Can we estimate how many clean buffers are there right now in shared_buffer
+8) I am performing VACUUM FULL on emp table. Which Lock is acquired on the emp table?
+9) Statement 'select * from emp'  I want to know how many times this statement is executed.
+10) Need to know if any of the table has DEAD TUPLES and if yes how many?
