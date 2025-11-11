@@ -129,3 +129,54 @@ DAY 2:
 =====
 
 
+max_parallel_maintenance_workers
+
+
+
+
+employees=# \d pg_settings
+               View "pg_catalog.pg_settings"
+     Column      |  Type   | Collation | Nullable | Default
+-----------------+---------+-----------+----------+---------
+ name            | text    |           |          |
+ setting         | text    |           |          |
+ unit            | text    |           |          |
+ category        | text    |           |          |
+ short_desc      | text    |           |          |
+ extra_desc      | text    |           |          |
+ context         | text    |           |          |
+ vartype         | text    |           |          |
+ source          | text    |           |          |
+ min_val         | text    |           |          |
+ max_val         | text    |           |          |
+ enumvals        | text[]  |           |          |
+ boot_val        | text    |           |          |
+ reset_val       | text    |           |          |
+ sourcefile      | text    |           |          |
+ sourceline      | integer |           |          |
+ pending_restart | boolean |           |          |
+
+
+              ^
+employees=# select name, setting, context from pg_settings where name ilike 'max_parallel_maintenan
+ce_workers';
+               name               | setting | context
+----------------------------------+---------+---------
+ max_parallel_maintenance_workers | 2       | user
+(1 row)
+
+
+employees=# select distinct context from pg_settings;
+      context
+-------------------
+ postmaster
+ superuser-backend
+ user
+ internal
+ backend
+ sighup
+ superuser
+(7 rows)
+
+
+employees=#
