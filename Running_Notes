@@ -234,3 +234,45 @@ width=11)
    Index Cond: (id = 500000)
 (2 rows)
 
+PGBENCH
+------
+
+Create a new database on server
+From Windows CMD
+
+C:\Users\Admin>cd  C:\Program Files\PostgreSQL\17\bin
+
+initialize:
+
+C:\Program Files\PostgreSQL\17\bin>pgbench -h localhost -U postgres -p 5432 -i benchtest
+Password:
+dropping old tables...
+NOTICE:  table "pgbench_accounts" does not exist, skipping
+NOTICE:  table "pgbench_branches" does not exist, skipping
+NOTICE:  table "pgbench_history" does not exist, skipping
+NOTICE:  table "pgbench_tellers" does not exist, skipping
+creating tables...
+generating data (client-side)...
+vacuuming...
+creating primary keys...
+done in 1.12 s (drop tables 0.01 s, create tables 0.05 s, client-side generate 0.65 s, vacuum 0.15 s, primary keys 0.26 s).
+
+C:\Program Files\PostgreSQL\17\bin>
+
+C:\Program Files\PostgreSQL\17\bin>pgbench -h localhost -U postgres -p 5432 -c 76 -t 20  benchtest
+
+
+pgbench (17.6)
+starting vacuum...end.
+transaction type: <builtin: TPC-B (sort of)>
+scaling factor: 1
+query mode: simple
+number of clients: 76
+number of threads: 1
+maximum number of tries: 1
+number of transactions per client: 20
+number of transactions actually processed: 1520/1520
+number of failed transactions: 0 (0.000%)
+latency average = 148.731 ms
+initial connection time = 17556.328 ms
+tps = 510.988608 (without initial connection time)
