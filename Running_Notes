@@ -276,3 +276,114 @@ number of failed transactions: 0 (0.000%)
 latency average = 148.731 ms
 initial connection time = 17556.328 ms
 tps = 510.988608 (without initial connection time)
+
+
+Explain 
+-------
+
+employees=# explain select * from emp where deptno = 30 order by ename;
+                         QUERY PLAN
+------------------------------------------------------------
+ Sort  (cost=16.90..16.91 rows=3 width=118)
+   Sort Key: ename
+   ->  Seq Scan on emp  (cost=0.00..16.88 rows=3 width=118)
+         Filter: (deptno = 30)
+(4 rows)
+
+
+employees=# explain analyze select * from emp where deptno = 30 order by ename;
+                                              QUERY PLAN                                         
+------------------------------------------------------------------------------------------------------
+ Sort  (cost=16.90..16.91 rows=3 width=118) (actual time=0.349..0.351 rows=6 loops=1)
+   Sort Key: ename
+   Sort Method: quicksort  Memory: 25kB
+   ->  Seq Scan on emp  (cost=0.00..16.88 rows=3 width=118) (actual time=0.096..0.103 rows=6 loops=1)
+         Filter: (deptno = 30)
+         Rows Removed by Filter: 8
+ Planning Time: 0.236 ms
+ Execution Time: 0.405 ms
+(8 rows)
+
+
+employees=# explain analyze select job, count(*) from emp group by job;
+                                               QUERY PLAN                                        
+--------------------------------------------------------------------------------------------------------
+ HashAggregate  (cost=18.25..20.25 rows=200 width=44) (actual time=0.118..0.123 rows=5 loops=1)
+   Group Key: job
+   Batches: 1  Memory Usage: 40kB
+   ->  Seq Scan on emp  (cost=0.00..15.50 rows=550 width=36) (actual time=0.066..0.069 rows=14 loops=1)
+ Planning Time: 0.327 ms
+ Execution Time: 0.405 ms
+(6 rows)
+
+
+employees=# explain (analyze, verbose)  select job, count(*) from emp group by job;
+                                                  QUERY PLAN                                     
+---------------------------------------------------------------------------------------------------------------
+ HashAggregate  (cost=18.25..20.25 rows=200 width=44) (actual time=0.116..0.121 rows=5 loops=1)
+   Output: job, count(*)
+   Group Key: emp.job
+   Batches: 1  Memory Usage: 40kB
+   ->  Seq Scan on public.emp  (cost=0.00..15.50 rows=550 width=36) (actual time=0.076..0.080 rows=14 loops=1)
+         Output: empno, ename, job, mgr, hiredate, sal, comm, deptno
+ Query Identifier: -9173949214585473201
+ Planning Time: 0.254 ms
+ Execution Time: 0.237 ms
+(9 rows)
+
+
+employees=# explain (analyze, verbose, buffers)  select job, count(*) from emp group by job;
+                                                  QUERY PLAN                                     
+---------------------------------------------------------------------------------------------------------------
+ HashAggregate  (cost=18.25..20.25 rows=200 width=44) (actual time=0.192..0.196 rows=5 loops=1)
+   Output: job, count(*)
+   Group Key: emp.job
+   Batches: 1  Memory Usage: 40kB
+   Buffers: shared hit=1
+   ->  Seq Scan on public.emp  (cost=0.00..15.50 rows=550 width=36) (actual time=0.159..0.162 rows=14 loops=1)
+         Output: empno, ename, job, mgr, hiredate, sal, comm, deptno
+         Buffers: shared hit=1
+ Query Identifier: -9173949214585473201
+ Planning Time: 0.222 ms
+ Execution Time: 0.306 ms
+(11 rows)
+
+
+employees=# explain (analyze, verbose, buffers)  select e.ename, e.job, d.dname, d.loc, s.grade from emp e join dept d on e.deptno = d.deptno join salgrade s on e.sal between s.losal and s.hisal;
+                                                         QUERY PLAN                              
+-----------------------------------------------------------------------------------------------------------------------------
+ Hash Join  (cost=24.85..22962.42 rows=274267 width=168) (actual time=0.981..1.097 rows=14 loops=1)
+   Output: e.ename, e.job, d.dname, d.loc, s.grade
+   Hash Cond: (e.deptno = d.deptno)
+   Buffers: shared hit=2 read=1 dirtied=1
+   ->  Nested Loop  (cost=0.00..13130.48 rows=83111 width=82) (actual time=0.856..0.957 rows=14 loops=1)
+         Output: e.ename, e.job, e.deptno, s.grade
+         Join Filter: ((e.sal >= s.losal) AND (e.sal <= s.hisal))
+         Rows Removed by Join Filter: 56
+         Buffers: shared hit=1 read=1 dirtied=1
+         ->  Seq Scan on public.salgrade s  (cost=0.00..23.60 rows=1360 width=32) (actual time=0.772..0.773 rows=5 loops=1)
+               Output: s.grade, s.losal, s.hisal
+               Buffers: shared read=1 dirtied=1
+         ->  Materialize  (cost=0.00..18.25 rows=550 width=92) (actual time=0.014..0.020 rows=14 loops=5)
+               Output: e.ename, e.job, e.deptno, e.sal
+               Buffers: shared hit=1
+               ->  Seq Scan on public.emp e  (cost=0.00..15.50 rows=550 width=92) (actual time=0.053..0.061 rows=14 loops=1)
+                     Output: e.ename, e.job, e.deptno, e.sal
+                     Buffers: shared hit=1
+   ->  Hash  (cost=16.60..16.60 rows=660 width=94) (actual time=0.079..0.079 rows=4 loops=1)
+         Output: d.dname, d.loc, d.deptno
+         Buckets: 1024  Batches: 1  Memory Usage: 9kB
+         Buffers: shared hit=1
+         ->  Seq Scan on public.dept d  (cost=0.00..16.60 rows=660 width=94) (actual time=0.068..0.070 rows=4 loops=1)
+               Output: d.dname, d.loc, d.deptno
+               Buffers: shared hit=1
+ Query Identifier: 7026818451019945887
+ Planning:
+   Buffers: shared hit=165
+ Planning Time: 4.379 ms
+ Execution Time: 1.223 ms
+(30 rows)
+
+
+employees=#
+
