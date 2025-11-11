@@ -180,3 +180,57 @@ employees=# select distinct context from pg_settings;
 
 
 employees=#
+
+HypoPG
+-----
+employees=# CREATE EXTENSION hypopg;
+CREATE EXTENSION
+employees=# CREATE TABLE hypo AS SELECT id, 'line ' || id AS val FROM gene
+rate_series(1, 1000000) id;
+SELECT 1000000
+employees=# \d
+                 List of relations
+ Schema |         Name          | Type  |  Owner
+--------+-----------------------+-------+----------
+ public | bonus                 | table | postgres
+ public | dept                  | table | postgres
+ public | emp                   | table | postgres
+ public | hypo                  | table | postgres
+ public | hypopg_hidden_indexes | view  | postgres
+ public | hypopg_list_indexes   | view  | postgres
+ public | salgrade              | table | postgres
+(7 rows)
+
+
+employees=# analyze hypo;
+ANALYZE
+employees=# EXPLAIN SELECT val FROM hypo WHERE id = 500000;
+                               QUERY PLAN
+------------------------------------------------------------------------
+ Gather  (cost=1000.00..11648.43 rows=1 width=11)
+   Workers Planned: 2
+   ->  Parallel Seq Scan on hypo  (cost=0.00..10648.33 rows=1 width=11)
+         Filter: (id = 500000)
+(4 rows)
+
+
+employees=# SELECT * FROM hypopg_create_index('CREATE INDEX ON hypo (id)')
+;
+ indexrelid |      indexname
+------------+----------------------
+      13592 | <13592>btree_hypo_id
+(1 row)
+
+
+employees=# analyze hypo;
+ANALYZE
+employees=# EXPLAIN SELECT val FROM hypo WHERE id = 500000;
+                                     QUERY PLAN
+
+--------------------------------------------------------------------------
+----------
+ Index Scan using "<13592>btree_hypo_id" on hypo  (cost=0.05..8.07 rows=1
+width=11)
+   Index Cond: (id = 500000)
+(2 rows)
+
