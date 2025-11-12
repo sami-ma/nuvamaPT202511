@@ -1,0 +1,17 @@
+1) Disable autovacuum on emp table
+2) Create a index on ename column of emp table. Now tweak the seq_page_cost & random_page_cost to force postgres to use Index.
+3) Tweak autovacuum parameters in a  such way that autoanalyze runs whenever 10% table is changed.
+4) Create a ndistinct extended statistics object on Job & ename columns from emp table
+5) Rewrite the following query using CTE to improve the performance
+         
+      select * from emp e1 where sal = (select max(e2.sal) from emp e2 where e2.deptno = e1.deptno)
+6) Query:
+      select ename, job, sal, sal*12 as annualsal, case deptno
+                                when 10 then 'Accounting'
+                                when 20 then 'Research'
+                                when 30 then 'Sales'
+                                else 'Dept Not Defined'
+                                end as Departname from emp where lower(job) in ('clerk', 'manager') order by upper(job), upper(ename);
+
+What we can do simplify this query and reduce cost at various levels:
+
