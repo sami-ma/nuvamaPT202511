@@ -387,3 +387,5 @@ employees=# explain (analyze, verbose, buffers)  select e.ename, e.job, d.dname,
 
 employees=#
 
+Day 3:
+======
